@@ -23,6 +23,7 @@ JSON_BEFORE = """
   "Profiles": [{{
     "Name": "Default.Profile.Theme",
     "Guid": "Default.Profile.Theme",
+    "Dynamic Profile Parent Name": "{}",
 
     "Background Image Location": "{}",
     "Background Image Is Tiled": {},
@@ -83,6 +84,7 @@ def generate(options):
   image = os.path.abspath(options.image)
 
   json_before = JSON_BEFORE.format(
+      options.parent,
       image, to_json_bool(options.tiled),
       options.contrast, options.blend)
 
@@ -155,6 +157,10 @@ def main():
       description='Generate iTerm2 color scheme based on an image')
 
   parser.add_argument('image', metavar='IMAGE', help="Image to process")
+
+  parser.add_argument(
+      '--parent', dest='parent', metavar='PROFILE', default="Default.Profile",
+      help="Profile this theme will inherit")
 
   parser.add_argument(
       '--out', dest='out', metavar='FILE', default=THEME,
