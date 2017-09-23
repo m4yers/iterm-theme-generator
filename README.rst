@@ -46,10 +46,11 @@ Options::
 
   usage: iTerm2 Theme Generator [-h] [--parent PROFILE] [--out FILE]
                                 [--tiled TILED] [--blend BLEND]
-                                [--contrast CONTRAST] [--saturation-min MIN]
-                                [--saturation-max MAX] [--brightness-min MIN]
-                                [--brightness-max MAX] [--rotate TIMES]
-                                [--inverted] [--reversed]
+                                [--transparency VALUE] [--contrast CONTRAST]
+                                [--saturation-min MIN] [--saturation-max MAX]
+                                [--brightness-min MIN] [--brightness-max MAX]
+                                [--rotate TIMES] [--inverted] [--reversed]
+                                [--no-background]
                                 IMAGE
 
   Generate iTerm2 color scheme based on an image
@@ -66,6 +67,7 @@ Options::
                           Support/iTerm2/DynamicProfiles/theme.json
     --tiled TILED         Tile the image. Default: False
     --blend BLEND         Blend(0.0-1.0). Default: 0.10
+    --transparency VALUE  Transparency(0.0-1.0). Default: 0.0
     --contrast CONTRAST   Contrast(0.0-1.0). Default: 0.0
     --saturation-min MIN  Minimal saturation(0.0-1.0). Default: 0.0
     --saturation-max MAX  Maximal saturation(0.0-1.0). Default: 1.0
@@ -74,6 +76,8 @@ Options::
     --rotate TIMES        Rotate colors order N times(0-7). Default: 0
     --inverted            Invert colors. Default: No
     --reversed            Reverse colors order. Default: No
+    --no-background       Disable background image. Useful if using
+                          transparency.
 
 Features
 ========

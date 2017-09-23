@@ -25,6 +25,9 @@ JSON_BEFORE = """
     "Guid": "Default.Profile.Theme",
     "Dynamic Profile Parent Name": "{}",
 
+    "Only The Default BG Color Uses Transparency" : false,
+    "Transparency" : {},
+
     "Background Image Location": "{}",
     "Background Image Is Tiled": {},
     "Minimum Contrast": {},
@@ -84,8 +87,9 @@ def generate(options):
   image = os.path.abspath(options.image)
 
   json_before = JSON_BEFORE.format(
-      options.parent,
-      image, to_json_bool(options.tiled),
+      options.parent, options.transparency,
+      "" if options.no_background else image,
+      to_json_bool(options.tiled),
       options.contrast, options.blend)
 
   json = ""
@@ -175,6 +179,10 @@ def main():
       help="Blend(0.0-1.0). Default: 0.10")
 
   parser.add_argument(
+      '--transparency', dest='transparency', metavar='VALUE',
+      type=float, default=0.0, help="Transparency(0.0-1.0). Default: 0.0")
+
+  parser.add_argument(
       '--contrast', dest='contrast', metavar='CONTRAST', type=float,
       default=0.0, help="Contrast(0.0-1.0). Default: 0.0")
 
@@ -206,5 +214,9 @@ def main():
   parser.add_argument(
       '--reversed', dest='reversed', action='store_true', default=False,
       help="Reverse colors order. Default: No")
+
+  parser.add_argument(
+      '--no-background', dest='no_background', action='store_true', default=False,
+      help="Disable background image. Useful if using transparency.")
 
   generate(parser.parse_args())
