@@ -82,10 +82,11 @@ Some iTerm features are exposed through the generator such as `tiling`,
 `blending`, `contrast`.
 
 The generator provides rudimentary color control, including:
-    - saturation min/max bound
-    - brightness min/max bound
-    - rotation and reversion of the generated color set
-    - color inversion
+
+* saturation min/max bound
+* brightness min/max bound
+* rotation and reversion of the generated color set
+* color inversion
 
 Using these features will allow you to capture an awesome color set that will
 fit your background image neatly.
