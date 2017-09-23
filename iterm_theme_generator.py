@@ -132,7 +132,7 @@ def generate(options):
 
     if i == COLOR_BLACK:
       colors = clamp_hsv(normal, mins=0.0, maxs=0.1, minv=0.04, maxv=0.06)
-      json += JSON_COLOR_NAMED.format("Backround", *colors)
+      json += JSON_COLOR_NAMED.format("Background", *colors)
 
       colors = clamp_hsv(normal, mins=0.0, maxs=0.1, minv=0.06, maxv=0.10)
       json += JSON_COLOR_NAMED.format("Selected Text", *colors)
