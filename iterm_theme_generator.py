@@ -160,7 +160,7 @@ def main():
 
   parser.add_argument(
       '--parent', dest='parent', metavar='PROFILE', default="Default.Profile",
-      help="Profile this theme will inherit")
+      help="Profile this theme will inherit. Default: 'Default.Profile'")
 
   parser.add_argument(
       '--out', dest='out', metavar='FILE', default=THEME,
