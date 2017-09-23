@@ -32,9 +32,6 @@ setup(
     keywords='iterm, iterm2, colors, theme, image, wallpaper',
     install_requires=requirements(),
     python_requires='>=2.7, <3',
-    package_data={
-        'templates': ['*.*'],
-    },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',

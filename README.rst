@@ -2,6 +2,18 @@
 iTerm2 Theme Generator
 ======================
 
+.. image:: https://img.shields.io/pypi/status/iterm-theme-generator.svg
+   :target: https://pypi.python.org/pypi/iterm-theme-generator
+   :alt: PyPi Status
+
+.. image:: https://img.shields.io/pypi/v/iterm-theme-generator.svg
+   :target: https://pypi.python.org/pypi/iterm-theme-generator
+   :alt: PyPi Version
+
+.. image:: https://img.shields.io/pypi/pyversions/iterm-theme-generator.svg
+   :target: https://pypi.python.org/pypi/iterm-theme-generator
+   :alt: Python Versions
+
 This theme generator will produce a color set for iTerm2 from an image.
 
 .. image:: https://i.imgur.com/iQWsYmG.png
@@ -10,6 +22,11 @@ This theme generator will produce a color set for iTerm2 from an image.
 
 Installation
 ============
+
+From pip::
+
+  $pip install --upgrade iterm-theme-generator
+
 
 Usage
 =====
@@ -61,15 +78,25 @@ Options::
 Features
 ========
 
-iTerm Features
---------------
-Some iTerm features are exposed through the generator
+Some iTerm features are exposed through the generator such as `tiling`,
+`blending`, `contrast`.
+
+The generator provides rudimentary color control, including:
+- saturation min/max bound
+- brightness min/max bound
+- rotation and reversion of the generated color set
+- color inversion
+
+Using these features will allow you to capture an awesome color set that will
+fit your background image neatly.
+
 
 Thanks To
 =========
 
 * radiosilence_ for the original script
 * metakirby5_ for colorz util
+
 
 Links
 =====
