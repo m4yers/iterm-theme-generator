@@ -144,7 +144,7 @@ def generate(options):
     json += JSON_COLOR_ANSI.format(i, *normal)
     json += JSON_COLOR_ANSI.format(i + 8, *bright)
 
-  with open(THEME, 'w') as theme:
+  with open(options.out, 'w') as theme:
     theme.write(json_before)
     theme.write(json[:-2])
     theme.write(JSON_AFTER)
@@ -155,6 +155,10 @@ def main():
       description='Generate iTerm2 color scheme based on an image')
 
   parser.add_argument('image', metavar='IMAGE', help="Image to process")
+
+  parser.add_argument(
+      '--out', dest='out', metavar='FILE', default=THEME,
+      help="Output file. Default: {}".format(THEME))
 
   parser.add_argument(
       '--tiled', dest='tiled', metavar='TILED', type=bool, default=False,
