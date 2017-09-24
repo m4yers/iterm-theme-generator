@@ -16,7 +16,7 @@ iTerm2 Theme Generator
 
 This theme generator will produce a color set for iTerm2 from an image.
 
-.. image:: https://i.imgur.com/iQWsYmG.png
+.. image:: https://imgur.com/a/DCoDU
 
 .. contents::
 
@@ -113,3 +113,4 @@ Links
 .. _GitHub: https://github.com/m4yers/iterm-theme-generator
 .. _radiosilence: https://gist.github.com/radiosilence/3946121
 .. _metakirby5: https://github.com/metakirby5/colorz
+.. _gallery: https://imgur.com/a/DCoDU
