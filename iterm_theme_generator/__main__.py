@@ -220,3 +220,6 @@ def main():
       help="Disable background image. Useful if using transparency.")
 
   generate(parser.parse_args())
+
+if __name__ == "__main__":
+  main()

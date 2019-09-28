@@ -1,26 +1,24 @@
 """Setup for iterm theme generator."""
 
 import io
-
-from setuptools import setup
-
+import setuptools
 
 def requirements():
-  with io.open('requirements.txt') as out:
+  with io.open('./requirements.txt') as out:
     return out.read()
 
 
 def version():
-  with io.open('VERSION') as out:
+  with io.open('./VERSION') as out:
     return out.read()
 
 
 def readme():
-  with io.open('README.rst') as out:
+  with io.open('./README.rst') as out:
     return out.read()
 
 
-setup(
+setuptools.setup(
     name='iterm-theme-generator',
     version=version(),
     description='Generate iTerm2 colors from an image',
@@ -32,6 +30,9 @@ setup(
     keywords='iterm, iterm2, colors, theme, image, wallpaper',
     install_requires=requirements(),
     python_requires='>=2.7, <3',
+    packages=setuptools.find_packages(),
+    data_files=[('.',['README.rst', 'requirements.txt', 'LICENSE', 'VERSION'])],
+    entry_points={'console_scripts': ['iterm_theme_generator=iterm_theme_generator.__main__:main']},
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
@@ -40,6 +41,4 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
-    ],
-    entry_points={'console_scripts': ['iterm_theme_generator = iterm_theme_generator:main']},
-)
+    ])
