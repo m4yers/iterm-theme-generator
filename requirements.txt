@@ -1,1 +1,3 @@
 colorz
+Pillow
+scikit-learn

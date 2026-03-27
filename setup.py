@@ -29,7 +29,7 @@ setuptools.setup(
     url='https://github.com/m4yers/iterm-theme-generator',
     keywords='iterm, iterm2, colors, theme, image, wallpaper',
     install_requires=requirements(),
-    python_requires='>=2.7, <3',
+    python_requires='>=3',
     packages=setuptools.find_packages(),
     data_files=[('.',['README.rst', 'requirements.txt', 'LICENSE', 'VERSION'])],
     entry_points={'console_scripts': ['iterm_theme_generator=iterm_theme_generator.__main__:main']},
@@ -40,5 +40,5 @@ setuptools.setup(
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
     ])
