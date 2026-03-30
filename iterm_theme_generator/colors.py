@@ -238,29 +238,55 @@ def hue_distance(a, b):
   return min(d, 1 - d)
 
 
-def assign_by_hue(candidates, targets):
-  """Greedy assignment: for each ANSI slot, pick the nearest unused candidate.
+def assign_colors(candidates, targets):
+  """Assign candidates to ANSI slots: red/green by hue, rest by max contrast.
 
-  Iterates slots in index order (RED first, then YELLOW, GREEN, etc.).
-  For each slot, finds the candidate whose hue is closest to the target
-  hue, assigns it, and removes it from the pool.
+  Red and green have strong semantic meaning (error/success), so they're
+  assigned by hue proximity.  The remaining 4 slots are filled by
+  greedily picking the candidate most distant in LAB space from all
+  already-chosen colors, producing maximum visual separation.
 
   Args:
-    candidates: List of float-RGB colors (the 14 non-black/white centers).
+    candidates: List of float-RGB colors (non-black/white cluster centers).
     targets:    Dict mapping ANSI slot → target hue (0.0–1.0).
 
   Returns:
     Dict mapping ANSI slot → assigned float-RGB color.
   """
-  remaining = list(candidates)
+  if not candidates:
+    return {}
+
+  labs = [rgb_to_lab(c) for c in candidates]
+  remaining = set(range(len(candidates)))
   assigned = {}
-  for slot, target_hue in sorted(targets.items(), key=lambda x: x[0]):
-    if not remaining:
-      break
-    best = min(remaining, key=lambda c: hue_distance(colorsys.rgb_to_hsv(*c)[0], target_hue))
+
+  def _lab_dist(a, b):
+    return sum((x - y) ** 2 for x, y in zip(a, b)) ** 0.5
+
+  # -- Phase 1: assign red and green by hue proximity ------------------
+  for slot in (COLOR_RED, COLOR_GREEN):
+    target_hue = targets[slot]
+    best = min(remaining, key=lambda i: hue_distance(
+        colorsys.rgb_to_hsv(*candidates[i])[0], target_hue))
     assigned[slot] = best
     remaining.remove(best)
-  return assigned
+
+  # -- Phase 2: fill remaining 4 slots by max LAB distance + hue diversity
+  free_slots = [s for s in sorted(targets) if s not in assigned]
+  chosen_labs = [labs[i] for i in assigned.values()]
+  chosen_hues = [colorsys.rgb_to_hsv(*candidates[i])[0] for i in assigned.values()]
+
+  for slot in free_slots:
+    best = max(remaining, key=lambda i: (
+        min(_lab_dist(labs[i], cl) for cl in chosen_labs) *
+        min((hue_distance(colorsys.rgb_to_hsv(*candidates[i])[0], ch) for ch in chosen_hues), default=1.0)
+    ))
+    assigned[slot] = best
+    remaining.remove(best)
+    chosen_labs.append(labs[best])
+    chosen_hues.append(colorsys.rgb_to_hsv(*candidates[best])[0])
+
+  return {slot: candidates[i] for slot, i in assigned.items()}
 
 
 def vivify(c, options):
@@ -328,11 +354,11 @@ def extract_colors(options):
   High-level pipeline:
     1. Load & thumbnail the image to 200×200 for speed.
     2. Convert every pixel to LAB color space.
-    3. Run KMeans (k=16) in LAB space to find 16 dominant colors.
-    4. Convert cluster centers back to sRGB and sort by luminance.
-    5. Assign darkest → BLACK, brightest → WHITE.
-    6. Assign the remaining 14 candidates to 6 chromatic ANSI slots
-       (RED, YELLOW, GREEN, CYAN, BLUE, MAGENTA) by hue proximity.
+    3. Run KMeans (k=30) in LAB space to find 30 dominant colors.
+    4. Split centers into achromatic (sat < 0.15) and chromatic pools.
+    5. Darkest achromatic → BLACK, brightest → WHITE.
+    6. Assign 6 chromatic ANSI slots from the chromatic pool only,
+       so desaturated grays can't steal chromatic slots.
     7. Apply vivify() boost/cap and derive bright variants.
     8. Clamp BLACK/WHITE into safe HSV ranges.
 
@@ -359,23 +385,46 @@ def extract_colors(options):
   # -- Step 2: Convert to LAB for perceptual clustering -----------------
   lab_pixels = [rgb_to_lab(p) for p in pixels]
 
-  # -- Step 3: KMeans clustering (16 clusters, LAB space) ---------------
-  # 16 clusters gives enough variety to fill 8 ANSI slots with good
-  # candidates; n_init=10 for stability, random_state=0 for reproducibility.
-  km = KMeans(n_clusters=16, n_init=10, random_state=0)
+  # -- Step 3: KMeans clustering (30 clusters, LAB space) ---------------
+  # 30 clusters gives a rich candidate pool; assign_colors picks red/green
+  # by hue proximity and fills the rest by maximizing LAB contrast.
+  km = KMeans(n_clusters=30, n_init=10, random_state=0)
   km.fit(lab_pixels)
 
-  # -- Step 4: Convert centers back to sRGB, sort by luminance ----------
-  centers = sorted([lab_to_rgb(c) for c in km.cluster_centers_],
-                   key=lambda c: relative_luminance(c))
+  # Find the dominant color (largest cluster) for background hue tinting
+  from collections import Counter
+  dominant_idx = Counter(km.labels_).most_common(1)[0][0]
+  dominant_rgb = lab_to_rgb(km.cluster_centers_[dominant_idx])
+  dominant_hue = colorsys.rgb_to_hsv(*dominant_rgb)[0]
 
-  # -- Step 5: Darkest → BLACK, brightest → WHITE -----------------------
-  black  = centers[0]
-  white  = centers[-1]
-  others = centers[1:-1]  # 14 remaining candidates for 6 chromatic slots
+  # -- Step 4: Convert centers back to sRGB, split into pools -----------
+  centers = [lab_to_rgb(c) for c in km.cluster_centers_]
 
-  # -- Step 6: Assign chromatic slots by hue proximity ------------------
-  assigned = assign_by_hue(others, TARGET_HUES)
+  # Separate into achromatic (low saturation) and chromatic pools.
+  # This prevents desaturated grays from stealing chromatic ANSI slots.
+  CHROMA_THRESHOLD = 0.15
+  achromatic = []
+  chromatic  = []
+  for c in centers:
+    _, s, _ = colorsys.rgb_to_hsv(*c)
+    (chromatic if s >= CHROMA_THRESHOLD else achromatic).append(c)
+
+  # -- Step 5: Darkest achromatic → BLACK, brightest → WHITE -----------
+  # Fall back to overall darkest/brightest if achromatic pool is too small
+  by_lum = sorted(achromatic or centers, key=lambda c: relative_luminance(c))
+  black = by_lum[0]
+  white = by_lum[-1]
+
+  # -- Step 6: Assign chromatic slots from the chromatic pool ----------
+  # If the image has fewer than 6 chromatic candidates, backfill from
+  # the achromatic pool (excluding black/white) sorted by saturation desc.
+  if len(chromatic) < 6:
+    backfill = sorted(
+      [c for c in achromatic if c is not black and c is not white],
+      key=lambda c: colorsys.rgb_to_hsv(*c)[1], reverse=True)
+    chromatic.extend(backfill[:6 - len(chromatic)])
+
+  assigned = assign_colors(chromatic, TARGET_HUES)
 
   # -- Step 7: Vivify + bright variants ---------------------------------
   # Build the result map: slot → (normal, bright)
@@ -442,8 +491,8 @@ def extract_colors(options):
     'cyan': result[COLOR_CYAN][0], 'cyan_b': result[COLOR_CYAN][1],
   }
 
-  bg       = clamp_hsv(black_n, mins=0.0, maxs=0.1,  minv=0.04, maxv=0.06)
-  bg2      = clamp_hsv(black_n, mins=0.0, maxs=0.1,  minv=0.08, maxv=0.14)
+  bg       = clamp_hsv(black_n, minh=dominant_hue, maxh=dominant_hue, mins=0.05, maxs=0.15, minv=0.08, maxv=0.06)
+  bg2      = clamp_hsv(black_n, minh=dominant_hue, maxh=dominant_hue, mins=0.05, maxs=0.15, minv=0.17, maxv=0.2)
   # fg brightness ceiling: 0.63 at v=0, 0.82 at v=1
   fg       = ensure_contrast(
                clamp_hsv(white_n, mins=0.12, maxs=0.16,
@@ -452,7 +501,8 @@ def extract_colors(options):
   # to keep it neutral/desaturated like fg and bg
   # brightness ceiling: 0.38 at v=0, 0.50 at v=1
   comment  = ensure_contrast(
-               clamp_hsv(black_b, maxh=0.1, mins=0.0, maxs=0.00,
+               clamp_hsv(black_b, minh=dominant_hue, maxh=dominant_hue,
+                         mins=0.1, maxs=0.1,
                          minv=0.0, maxv=v * 0.12), bg, min_ratio*0.6)
 
   # Contrast-check every chromatic color (normal + bright) against bg,

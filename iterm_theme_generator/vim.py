@@ -119,8 +119,8 @@ def generate_vim(options):
     '" ── UI ──────────────────────────────────────────────────────────────',
     hi("Normal",          fg=fg,      bg=None if getattr(options, 'vim_no_bg', False) else bg),       # Default text
     hi("NormalFloat",     fg=fg,      bg=bg2),      # Floating windows (Neovim)
-    hi("NonText",         fg=comment),               # ~ lines after EOF, listchars
-    hi("EndOfBuffer",     fg=comment),               # ~ column in Neovim
+    hi("NonText",         fg=bg2),                   # ~ lines after EOF, listchars
+    hi("EndOfBuffer",     fg=bg2),                   # ~ column in Neovim
     hi("SpecialKey",      fg=comment),               # Unprintable characters
     hi("Conceal",         fg=comment),               # Concealed text (e.g. in markdown)
     hi("Visual",          fg=fg,      bg=sel),       # Visual selection
@@ -130,16 +130,16 @@ def generate_vim(options):
     hi("CurSearch",       fg=bg,      bg=yellow_b),  # Current search match (Neovim)
     hi("MatchParen",      fg=bg,      bg=bold_col, attr="bold"),  # Matching bracket
     hi("Cursor",          fg=bg,      bg=fg),        # Cursor block
-    hi("CursorLine",                               attr="NONE"),  # Line under cursor
-    hi("CursorColumn",                             attr="NONE"),  # Column under cursor
-    hi("CursorLineNr",    fg=yellow),                # Line number on cursor line
-    hi("ColorColumn"),                               # Column guide (default)
-    hi("LineNr",          fg=comment),               # Line numbers
+    hi("CursorLine",                  bg=bg2, attr="NONE"),  # Line under cursor
+    hi("CursorColumn",                bg=bg2, attr="NONE"),  # Column under cursor
+    hi("CursorLineNr",    fg=bg2,     bg=bg2),               # Line number on cursor line
+    hi("ColorColumn",                 bg=bg2),               # Column guide
+    hi("LineNr",          fg=bg2),                           # Line numbers
     hi("SignColumn",      fg=green),                 # Gutter sign column
     hi("FoldColumn",      fg=comment),               # Fold indicator column
     hi("Folded",          fg=comment, bg=bg2),       # Folded text
-    hi("VertSplit",       fg=comment),                # Vertical split separator
-    hi("WinSeparator",    fg=comment),                # Window separator (Neovim)
+    hi("VertSplit",       fg=bg2),                    # Vertical split separator
+    hi("WinSeparator",    fg=bg2),                    # Window separator (Neovim)
     hi("StatusLine",      fg=fg,      bg=blue),      # Active status line
     hi("StatusLineNC",    fg=comment),               # Inactive status line
     hi("StatusLineTerm",  fg=fg,      bg=blue),      # Terminal status line
@@ -162,9 +162,9 @@ def generate_vim(options):
     hi("ErrorMsg",        fg=red_b,   bg=err_bg),    # Command-line error messages
     hi("Todo",            fg=yellow,               attr="bold"),  # TODO/FIXME/XXX
     hi("DiffAdd",         bg=clamp_hsv(green, maxs=0.5, minv=0.08, maxv=0.10)),
-    hi("DiffChange",      bg=clamp_hsv(blue, maxs=0.5, minv=0.1, maxv=0.2)),
+    hi("DiffChange",      bg=clamp_hsv(comment, maxs=0.2, minv=0.10, maxv=0.14)),
     hi("DiffDelete",      bg=clamp_hsv(red, maxs=0.5, minv=0.08, maxv=0.10)),
-    hi("DiffText",        bg=clamp_hsv(blue, maxs=0.80, minv=0.12, maxv=0.22), attr="bold"),   # Changed text within a line
+    hi("DiffText",        bg=clamp_hsv(comment, maxs=0.3, minv=0.14, maxv=0.20), attr="bold"),   # Changed text within a line
     hi("SpellBad",        sp=red,     attr="undercurl"),          # Misspelled word
     hi("SpellCap",        sp=blue,    attr="undercurl"),          # Uncapitalized sentence
     hi("SpellLocal",      sp=cyan,    attr="undercurl"),          # Wrong region word
@@ -225,6 +225,35 @@ def generate_vim(options):
     hi("diffIndexLine",   fg=blue),                  # Index line
     hi("diffSubname",     fg=fg),                    # Function context
     hi("diffBDiffer",     fg=magenta),               # Binary files differ
+    "",
+
+    # ── Markdown ───────────────────────────────────────────────────────
+    '" ── Markdown ────────────────────────────────────────────────────────',
+    hi("markdownH1",              fg=cyan,      attr="bold"),
+    hi("markdownH2",              fg=cyan,      attr="bold"),
+    hi("markdownH3",              fg=cyan_b),
+    hi("markdownH4",              fg=cyan_b),
+    hi("markdownH5",              fg=cyan_b),
+    hi("markdownH6",              fg=cyan_b),
+    link("markdownH1Delimiter",   "markdownH1"),
+    link("markdownH2Delimiter",   "markdownH2"),
+    link("markdownH3Delimiter",   "markdownH3"),
+    link("markdownH4Delimiter",   "markdownH4"),
+    link("markdownH5Delimiter",   "markdownH5"),
+    link("markdownH6Delimiter",   "markdownH6"),
+    hi("markdownBold",            fg=fg,        attr="bold"),
+    hi("markdownItalic",          fg=fg,        attr="italic"),
+    hi("markdownBoldItalic",      fg=fg,        attr="bold,italic"),
+    hi("markdownCode",            fg=comment),
+    hi("markdownCodeBlock",       fg=comment),
+    hi("markdownCodeDelimiter",   fg=bg2),
+    hi("markdownBlockquote",      fg=comment),
+    hi("markdownListMarker",      fg=comment),
+    hi("markdownOrderedListMarker", fg=comment),
+    hi("markdownUrl",             fg=comment),
+    hi("markdownUrlTitle",        fg=blue),
+    hi("markdownLinkText",        fg=blue),
+    hi("markdownRule",            fg=bg2),
     "",
 
     # ── LSP / Diagnostics (Neovim built-in + older vim-lsp) ────────────
@@ -364,6 +393,8 @@ def generate_vim(options):
     _generate_airline(options.vim_out, name, bg, bg2, fg, comment, blue, green, magenta, red)
   if 'nerdtree' in plugins:
     _generate_nerdtree_syntax(options.vim_out, comment, blue, cyan, cyan_b, green, bg2, yellow, yellow_b)
+  if 'vim-markdown' in plugins:
+    _generate_vim_markdown(options.vim_out, fg, bg2, comment, cyan, cyan_b, blue)
 
 
 def _generate_airline(vim_out, name, bg, bg2, fg, comment, blue, green, magenta, red):
@@ -448,4 +479,41 @@ def _generate_nerdtree_syntax(vim_out, comment, blue, cyan, cyan_b, green, bg2, 
     lines.append("call matchadd('{}', {} . s:tail)".format(name, pat))
 
   with open(path, 'w') as f:
+    f.write('\n'.join(lines) + '\n')
+
+
+def _generate_vim_markdown(vim_out, fg, bg2, comment, cyan, cyan_b, blue):
+  """Append preservim/vim-markdown highlight groups to the colorscheme.
+
+  The plugin uses htmlH1-H6 for heading content, mkdHeading for the #
+  delimiters, and mkd* groups for everything else — completely ignoring
+  the built-in markdown* groups.
+  """
+  hi = _hi
+  lines = [
+    '',
+    '" ── vim-markdown (preservim) ─────────────────────────────────────────',
+    hi("htmlH1",             fg=cyan,    attr="bold"),
+    hi("htmlH2",             fg=cyan,    attr="bold"),
+    hi("htmlH3",             fg=cyan_b),
+    hi("htmlH4",             fg=cyan_b),
+    hi("htmlH5",             fg=cyan_b),
+    hi("htmlH6",             fg=cyan_b),
+    hi("mkdHeading",         fg=cyan,    attr="bold"),
+    hi("mkdCode",            fg=comment),
+    hi("mkdCodeDelimiter",   fg=comment),
+    hi("mkdCodeStart",       fg=comment),
+    hi("mkdCodeEnd",         fg=comment),
+    hi("mkdBlockquote",      fg=comment),
+    hi("mkdListItem",        fg=comment),
+    hi("mkdRule",            fg=bg2),
+    hi("mkdLink",            fg=blue),
+    hi("mkdInlineURL",       fg=comment),
+    hi("mkdURL",             fg=comment),
+    hi("mkdLinkTitle",       fg=blue),
+    hi("mkdDelimiter",       fg=comment),
+    hi("mkdBold",            fg=fg,      attr="bold"),
+    hi("mkdItalic",          fg=fg,      attr="italic"),
+  ]
+  with open(vim_out, 'a') as f:
     f.write('\n'.join(lines) + '\n')

@@ -52,8 +52,8 @@ def main():
       help="If set, also generate a Vim colorscheme at this path (e.g. ~/.vim/colors/terminal.vim)")
 
   parser.add_argument(
-      '--vim-plugins', dest='vim_plugins', metavar='PLUGIN', nargs='*', default=['airline', 'nerdtree'],
-      help="Vim plugins to generate theme files for (e.g. airline nerdtree). Default: airline nerdtree")
+      '--vim-plugins', dest='vim_plugins', metavar='PLUGIN', nargs='*', default=['airline', 'nerdtree', 'vim-markdown'],
+      help="Vim plugins to generate theme files for (e.g. airline nerdtree vim-markdown). Default: airline nerdtree vim-markdown")
 
   # -- iTerm2 display settings ------------------------------------------
   parser.add_argument(
