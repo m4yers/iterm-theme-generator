@@ -161,10 +161,10 @@ def generate_vim(options):
     hi("Error",           fg=red_b,   bg=err_bg),    # Error messages
     hi("ErrorMsg",        fg=red_b,   bg=err_bg),    # Command-line error messages
     hi("Todo",            fg=yellow,               attr="bold"),  # TODO/FIXME/XXX
-    hi("DiffAdd",         bg=clamp_hsv(green, maxs=0.5, minv=0.08, maxv=0.10)),
-    hi("DiffChange",      bg=clamp_hsv(comment, maxs=0.2, minv=0.10, maxv=0.14)),
-    hi("DiffDelete",      bg=clamp_hsv(red, maxs=0.5, minv=0.08, maxv=0.10)),
-    hi("DiffText",        bg=clamp_hsv(comment, maxs=0.3, minv=0.14, maxv=0.20), attr="bold"),   # Changed text within a line
+    hi("DiffAdd",         bg=clamp_hsv(green, maxs=0.5, minv=0.12, maxv=0.15)),
+    hi("DiffChange",      bg=clamp_hsv(comment, maxs=0.2, minv=0.14, maxv=0.18)),
+    hi("DiffDelete",      bg=clamp_hsv(red, maxs=0.5, minv=0.12, maxv=0.15)),
+    hi("DiffText",        bg=clamp_hsv(comment, maxs=0.3, minv=0.18, maxv=0.24), attr="bold"),   # Changed text within a line
     hi("SpellBad",        sp=red,     attr="undercurl"),          # Misspelled word
     hi("SpellCap",        sp=blue,    attr="undercurl"),          # Uncapitalized sentence
     hi("SpellLocal",      sp=cyan,    attr="undercurl"),          # Wrong region word
